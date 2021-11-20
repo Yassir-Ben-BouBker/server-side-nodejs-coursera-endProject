@@ -1,84 +1,65 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+// Import Modules 
 
-var session = require('express-session');
-var FileStore = require('session-file-store')(session);
+// App Config
+var config = require('./config');
 
-
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-
-var disheRouter = require('./routes/dishe');
-var leaderRouter = require('./routes/leader');
-var promotionRouter = require('./routes/promotion');
-
-
+// Express , Mongoose, 
+const express = require('express'); // 
 const mongoose = require('mongoose');
-const Dishes = require('./models/dishes')
-const Promotions = require('./models/promotions');
+
+// Access and interact with the file system.
+const path = require('path');
+
+// Error handling
+const createError = require('http-errors');
+
+// Log HTTP requests and errors, (in CMD)
+const logger = require('morgan');
+
+// Cookies and Sessions
+const cookieParser = require('cookie-parser');
+
+const session = require('express-session');
+const FileStore = require('session-file-store')(session);
+
+// Authentification and Authorsation
+const passport = require('passport');
+const authenticate = require('./authenticate');
 
 
-const url = 'mongodb://localhost:27017/conFusion';
-const connect = mongoose.connect(url);
+// Access the Route
+  // public Route
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+  // protected Route
+const disheRouter = require('./routes/dishe');
+const leaderRouter = require('./routes/leader');
+const promotionRouter = require('./routes/promotion');
 
-connect.then((db) => {
+
+  // Establishing dataBase Connection
+mongoose.connect(config.mongoUrl).then((db) => {
   console.log("Connected Correctly to the Database");
 }, (err) => { console.log(err); })
 
-var app = express();
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+// start Express
+var app = express();
 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// app.use(cookieParser('12345-34567-87654-12345'));
-app.use(session({
-  name:'session-id',
-  secret: '12345-34567-87654-12345',
-  saveUninitialized:false,
-  resave:false,
-  store: new FileStore()
-}));
-
 // authorization function
+app.use(passport.initialize());
 
-// public url
+// Access to public route
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-
-function auth (req, res, next) {
-    console.log(req.session);
-
-  if(!req.session.user) {
-      var err = new Error('You are not authenticated!');
-      err.status = 403;
-      return next(err);
-  }
-  else {
-    if (req.session.user === 'authenticated') {
-      next();
-    }
-    else {
-      var err = new Error('You are not authenticated!');
-      err.status = 403;
-      return next(err);
-    }
-  }
-}
-
-app.use(auth); // to authorize
-
+// Access to public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-
-
+// Access to protected route
 app.use('/dishes', disheRouter);
 app.use('/leaders', leaderRouter);
 app.use('/promotions', promotionRouter);
