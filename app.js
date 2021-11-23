@@ -36,6 +36,8 @@ const disheRouter = require('./routes/dishe');
 const leaderRouter = require('./routes/leader');
 const promotionRouter = require('./routes/promotion');
 
+const uploadRouter = require('./routes/upload');
+
 
   // Establishing dataBase Connection
 mongoose.connect(config.mongoUrl).then((db) => {
@@ -74,6 +76,7 @@ app.use('/dishes', disheRouter);
 app.use('/leaders', leaderRouter);
 app.use('/promotions', promotionRouter);
 
+app.use('/imageUpload',uploadRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
