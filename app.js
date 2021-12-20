@@ -24,6 +24,7 @@ const FileStore = require('session-file-store')(session);
 
 // Authentification and Authorsation
 const passport = require('passport');
+
 const authenticate = require('./authenticate');
 
 
@@ -35,6 +36,7 @@ const usersRouter = require('./routes/users');
 const disheRouter = require('./routes/dishe');
 const leaderRouter = require('./routes/leader');
 const promotionRouter = require('./routes/promotion');
+const favoriteRouter = require('./routes/favorite')
 
 const uploadRouter = require('./routes/upload');
 
@@ -80,6 +82,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/dishes', disheRouter);
 app.use('/leaders', leaderRouter);
 app.use('/promotions', promotionRouter);
+app.use('/favorites',favoriteRouter); // favorite route
 
 app.use('/imageUpload',uploadRouter);
 

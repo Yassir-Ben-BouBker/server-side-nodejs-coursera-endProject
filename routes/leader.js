@@ -11,7 +11,7 @@ leaderRouter.use(express.json());
 
 
 leaderRouter.route('/')
-.get(cors.cors, (req,res,next) => {
+.get(cors.corsWithOptions,authenticate.verifyUser,  (req,res,next) => {
     Leaders.find({})
     .then((Leader) => {
         res.statusCode = 200;

@@ -20,7 +20,25 @@ userRouter.route('/')
   .catch((err) => next(err));
 });
 
-userRouter.get('/facebook/token', passport.authenticate('facebook-token'), (req, res) => {
+// userRouter.get('/auth/facebook',
+//   passport.authenticate('facebook'));
+
+  userRouter.get('/auth/facebook/secret',
+  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  function(req, res) {
+    // Successful authentication, redirect home.
+    if (req.user) {
+      var token = authenticate.getToken({_id: req.user._id});
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.json({success: true, token: token, status: 'You are successfully logged in!'});
+    }else{
+      res.redirect('/');
+    }
+  });
+
+
+userRouter.get('/facebook/token', passport.authenticate('facebook'), (req, res) => {
   if (req.user) {
     var token = authenticate.getToken({_id: req.user._id});
     res.statusCode = 200;
@@ -28,6 +46,7 @@ userRouter.get('/facebook/token', passport.authenticate('facebook-token'), (req,
     res.json({success: true, token: token, status: 'You are successfully logged in!'});
   }
 });
+
 
 userRouter.post('/signup', (req, res, next) => {
   User.register(new User({username: req.body.username}), 
